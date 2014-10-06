@@ -54,3 +54,7 @@ This chunk of code:
 ```
 
 generates a table of recent Facebook and Twitter posts, sorted by reverse date.
+
+Why sebso_social?
+=================
+Because my website is at http://seb.so; and this was a social plugin I built for a client for use in a WordPress site. 
