@@ -45,6 +45,8 @@ This chunk of code:
    <div class="social-post">
       <table border="1">
          <tr><td>Source</td><td><?php echo $post->source; ?></td></tr>
+         <tr><td>Content</td><td><?php echo $post->content; ?></td></tr>
+         <tr><td>Date</td><td><?php echo $post->date; ?></td></tr>
          <tr><td>Link</td><td><?php echo $post->sourceLink; ?></td></tr>
          <tr><td>Account</td><td><?php echo $post->sourceAccount; ?></td></tr>
          <tr><td>Images[0]</td><td><?php if ($post->imgs) : ?><img src="<?php echo $post->imgs[0]; ?>" /><?php endif; ?></td></tr>
