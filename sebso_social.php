@@ -1,5 +1,4 @@
 <?php
-
    define("SEBSO_SOCIAL_STATEFILE", "social_state.ser");
 
    define("SEBSO_SOCIAL_TWITTER_CONSUMER_KEY", "yourkey");
@@ -40,13 +39,19 @@
 
       function __construct($twitterAcc, $facebookAcc, $count) {
          if (!$this->load()) {
-            $fb = $this->latest_facebook($facebookAcc, $count);
-            $tw = $this->latest_twitter($twitterAcc, $count);
-            $posts = array_merge($fb, $tw);
-            usort($posts, Array($this, "social_sort"));
-            $this->posts = $posts;
-            $this->updated = time();
-            $this->save();
+	   $fb = array();
+	   $tw = array();
+	   if(isset($twitterAcc)){
+	     $tw = $this->latest_twitter($twitterAcc, $count);
+	   }
+	   if(isset($facebookAcc)){
+	     $fb = $this->latest_facebook($facebookAcc, $count);
+	   }
+	   $posts = array_merge($fb, $tw);
+	   usort($posts, Array($this, "social_sort"));
+	   $this->posts = $posts;
+	   $this->updated = time();
+	   $this->save();
          }
       }
 
@@ -119,34 +124,22 @@
          $fb = json_decode($fb);
          $ret = Array();
          foreach ($fb->data as $post) {
-            $date = strtotime($post->created_time);
-            $text = isset($post->message) ? $post->message : "";
-            $imgs = Array();
-            if (isset($post->object_id)) {
-               $imgSizes = sebso_fetch_url("https://graph.facebook.com/v2.1/" . $post->object_id . "?access_token=" . $access_token);
-               $imgSizes = json_decode($imgSizes);
-               foreach ($imgSizes->images as $image) {
-                  if (strpos($image->source, "p320x320") !== false) {
-                     $imgs = Array($image->source);
-                     break;
-                  }
-               }
-            }
-            if (!$text && !$imgs) continue;
-            $sourceLink = "https://www.facebook.com/" . $account;
-            $ret[] = new SebSoSocialItem("facebook", $sourceLink, $account, $date, $text, $imgs);
+	   $date = strtotime($post->created_time);
+	   $text = isset($post->message) ? $post->message : "";
+	   $imgs = Array();
+	   if (isset($post->object_id)) {
+	     $imgSizes = sebso_fetch_url("https://graph.facebook.com/v2.1/" . $post->object_id . "?access_token=" . $access_token);
+	     $imgSizes = json_decode($imgSizes);
+	     foreach ($imgSizes->images as $image) {
+	       if (strpos($image->source, "p320x320") !== false) {
+		 $imgs = Array($image->source);
+		 break;
+	       }
+	     }
+	   }
+	   if (!$text && !$imgs) continue;
+	   $sourceLink = "https://www.facebook.com/" . $account;
+	   $ret[] = new SebSoSocialItem("facebook", $sourceLink, $account, $date, $text, $imgs);
          }
          return $ret;
       }
-
-   }
-
-   function sebso_fetch_url($url) {
-      $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, $url);
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      $ret = curl_exec($ch);
-      curl_close($ch);
-      return $ret;
-   }
-
