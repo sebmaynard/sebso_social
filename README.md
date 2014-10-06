@@ -10,13 +10,15 @@ First, you'll need to create Facebook and Twitter applications to get your devel
 
 Next up, you'll need to make sure you have the Twitter oauth library (I used this one: https://github.com/abraham/twitteroauth) available. The source file does:
 
+```php
     require_once('twitteroauth/twitteroauth.php');
+```
 
 before anything else.
 
 To use it, this chunk of code:
 
-````
+```php
 <style>
    img { max-width: 100px; max-height: 100px; }
    .social-post { margin-bottom : 20px; }
@@ -38,6 +40,6 @@ To use it, this chunk of code:
       </table>
    </div>
    <?php endforeach; ?>
-````
+```
 
 generates a table of recent Facebook and Twitter posts, sorted by reverse date.
