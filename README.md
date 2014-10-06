@@ -1,4 +1,4 @@
-sebso_social
+SebSoSocial
 ============
 
 A simple php class to get the combined latest posts from combined Facebook and Twitter accounts
