@@ -18,7 +18,9 @@ before anything else.
 
 To use it, instantiate the SebSoSocial class, passing the desire Twitter account name, Facebook page name, and number of each type of post you'd like:
 
+```php
     $social = new SebSoSocial($twitter, $facebook, $numOfEach);
+```
 
 Then loop over `$social->posts` to get classes with `->source` (e.g. "Facebook"), `->sourceLink` (link to the original post), `->sourceAccount` and `->imgs` (an array of urls of images for the post).
 
