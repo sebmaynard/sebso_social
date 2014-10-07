@@ -6,7 +6,7 @@ A simple php class to get the combined latest posts from combined Facebook and T
 Usage
 =====
 
-First, you'll need to create Facebook and Twitter applications to get your developer keys. Then put these at the top of sebso_social.php.
+First, you'll need to create Facebook and Twitter applications to get your developer keys, then define these before you include the lib.
 
 Next up, you'll need to make sure you have the Twitter oauth library (I used this one: https://github.com/abraham/twitteroauth) available. The source file does:
 
@@ -24,6 +24,14 @@ To use it, instantiate the SebSoSocial class, passing the desire Twitter account
 
 Then loop over `$social->posts` to get classes with `->source` (e.g. "Facebook"), `->sourceLink` (link to the original post), `->sourceAccount` and `->imgs` (an array of urls of images for the post).
 
+```php
+<?php
+   foreach ($social->posts as $post) {
+      echo $post->content;
+   }
+?>
+```
+
 Example
 =======
 
@@ -36,6 +44,14 @@ This chunk of code:
 </style>
 
 <?php
+   define("SEBSO_SOCIAL_TWITTER_CONSUMER_KEY", "yourkey");
+   define("SEBSO_SOCIAL_TWITTER_CONSUMER_SECRET", "yourkey");
+   define("SEBSO_SOCIAL_TWITTER_ACCESS_TOKEN", "yourkey");
+   define("SEBSO_SOCIAL_TWITTER_ACCESS_TOKEN_SECRET", "yourkey");
+
+   define("SEBSO_SOCIAL_FACEBOOK_APPID", "yourkey");
+   define("SEBSO_SOCIAL_FACEBOOK_APPSECRET", "yourkey");
+
    include("sebso_social.php");
    $twitter = "Google";
    $facebook = "Google";
@@ -59,4 +75,4 @@ generates a table of recent Facebook and Twitter posts, sorted by reverse date.
 
 Why sebso_social?
 =================
-Because my website is at http://seb.so; and this was a social plugin I built for a client for use in a WordPress site. 
+Because my website is at http://seb.so; and this was a social plugin I built for a client for use in a WordPress site.
