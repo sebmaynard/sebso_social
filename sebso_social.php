@@ -40,8 +40,10 @@
 
       function __construct($twitterAcc, $facebookAcc, $count) {
          if (!$this->load()) {
-            $fb = $this->latest_facebook($facebookAcc, $count);
-            $tw = $this->latest_twitter($twitterAcc, $count);
+            $tw = Array();
+            $fb = Array();
+            if ($twitterAcc) $tw = $this->latest_twitter($twitterAcc, $count);
+            if ($facebookAcc) $fb = $this->latest_facebook($facebookAcc, $count);
             $posts = array_merge($fb, $tw);
             usort($posts, Array($this, "social_sort"));
             $this->posts = $posts;
