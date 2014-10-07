@@ -1,14 +1,14 @@
 <?php
 
-   define("SEBSO_SOCIAL_STATEFILE", "social_state.ser");
+   if (!defined("SEBSO_SOCIAL_STATEFILE")) define("SEBSO_SOCIAL_STATEFILE", "social_state.ser");
 
-   define("SEBSO_SOCIAL_TWITTER_CONSUMER_KEY", "yourkey");
-   define("SEBSO_SOCIAL_TWITTER_CONSUMER_SECRET", "yourkey");
-   define("SEBSO_SOCIAL_TWITTER_ACCESS_TOKEN", "yourkey-yourkey");
-   define("SEBSO_SOCIAL_TWITTER_ACCESS_TOKEN_SECRET", "yourkey");
+   if (!defined("SEBSO_SOCIAL_TWITTER_CONSUMER_KEY")) define("SEBSO_SOCIAL_TWITTER_CONSUMER_KEY", "yourkey");
+   if (!defined("SEBSO_SOCIAL_TWITTER_CONSUMER_SECRET")) define("SEBSO_SOCIAL_TWITTER_CONSUMER_SECRET", "yourkey");
+   if (!defined("SEBSO_SOCIAL_TWITTER_ACCESS_TOKEN")) define("SEBSO_SOCIAL_TWITTER_ACCESS_TOKEN", "yourkey-yourkey");
+   if (!defined("SEBSO_SOCIAL_TWITTER_ACCESS_TOKEN_SECRET")) define("SEBSO_SOCIAL_TWITTER_ACCESS_TOKEN_SECRET", "yourkey");
 
-   define("SEBSO_SOCIAL_FACEBOOK_APPID", "yourkey");
-   define("SEBSO_SOCIAL_FACEBOOK_APPSECRET", "yourkey");
+   if (!defined("SEBSO_SOCIAL_FACEBOOK_APPID")) define("SEBSO_SOCIAL_FACEBOOK_APPID", "yourkey");
+   if (!defined("SEBSO_SOCIAL_FACEBOOK_APPSECRET")) define("SEBSO_SOCIAL_FACEBOOK_APPSECRET", "yourkey");
 
    // https://github.com/abraham/twitteroauth
    require_once('twitteroauth/twitteroauth.php');
@@ -42,8 +42,11 @@
          if (!$this->load()) {
             $tw = Array();
             $fb = Array();
-            if ($twitterAcc) $tw = $this->latest_twitter($twitterAcc, $count);
-            if ($facebookAcc) $fb = $this->latest_facebook($facebookAcc, $count);
+            // double the count so after filtering of unwanted posts we can still try and get the desired number
+            if ($twitterAcc) $tw = $this->latest_twitter($twitterAcc, $count * 2);
+            if ($facebookAcc) $fb = $this->latest_facebook($facebookAcc, $count * 2);
+            $tw = array_slice($tw, 0, 10);
+            $fb = array_slice($fb, 0, 10);
             $posts = array_merge($fb, $tw);
             usort($posts, Array($this, "social_sort"));
             $this->posts = $posts;
@@ -92,6 +95,7 @@
 
          $ret = Array();
          foreach ($latesttweets as $tweet) {
+            if (!is_object($tweet)) continue;
             $text = $tweet->text;
 
             if ($tweet->entities && $tweet->entities->urls) {
@@ -120,23 +124,31 @@
          $fb = sebso_fetch_url("https://graph.facebook.com/" . $account . "/feed?limit=" . $number . "&access_token=" . $access_token);
          $fb = json_decode($fb);
          $ret = Array();
-         foreach ($fb->data as $post) {
-            $date = strtotime($post->created_time);
-            $text = isset($post->message) ? $post->message : "";
-            $imgs = Array();
-            if (isset($post->object_id)) {
-               $imgSizes = sebso_fetch_url("https://graph.facebook.com/v2.1/" . $post->object_id . "?access_token=" . $access_token);
-               $imgSizes = json_decode($imgSizes);
-               foreach ($imgSizes->images as $image) {
-                  if (strpos($image->source, "p320x320") !== false) {
-                     $imgs = Array($image->source);
-                     break;
+         if (!empty($fb->data)) {
+            foreach ($fb->data as $post) {
+               $date = strtotime($post->created_time);
+               $text = isset($post->message) ? $post->message : "";
+               $imgs = Array();
+               if (isset($post->object_id)) {
+                  $imgSizes = sebso_fetch_url("https://graph.facebook.com/v2.1/" . $post->object_id . "?access_token=" . $access_token);
+                  $imgSizes = json_decode($imgSizes);
+                  if (isset($imgSizes->images)) {
+                     foreach ($imgSizes->images as $image) {
+                        if (strpos($image->source, "p320x320") !== false) {
+                           $imgs = Array($image->source);
+                           break;
+                        }
+                     }
                   }
                }
+               // no images, but existing text and a link?
+               if (!$imgs && ($text && isset($post->link))) $text = $text . " " . $post->link;
+               if (!$text && !$imgs) {
+                  continue;
+               }
+               $sourceLink = "https://www.facebook.com/" . $account;
+               $ret[] = new SebSoSocialItem("facebook", $sourceLink, $account, $date, $text, $imgs);
             }
-            if (!$text && !$imgs) continue;
-            $sourceLink = "https://www.facebook.com/" . $account;
-            $ret[] = new SebSoSocialItem("facebook", $sourceLink, $account, $date, $text, $imgs);
          }
          return $ret;
       }
