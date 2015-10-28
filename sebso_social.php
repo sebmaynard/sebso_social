@@ -11,7 +11,8 @@
    if (!defined("SEBSO_SOCIAL_FACEBOOK_APPSECRET")) define("SEBSO_SOCIAL_FACEBOOK_APPSECRET", "yourkey");
 
    // https://github.com/abraham/twitteroauth
-   require_once('twitteroauth/twitteroauth.php');
+   require_once("twitteroauth/autoload.php");
+   use Abraham\TwitterOAuth\TwitterOAuth;
 
    class SebSoSocialItem {
 
